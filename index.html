@@ -4,21 +4,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Kuesioner Runtainment Vol. 2</title>
-  <!-- Menggunakan Tailwind CSS untuk styling cepat -->
+  <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <style>
-    /* Background gradient sesuai tema poster merah ke oranye */
-    .bg-tema-ygr {
-      background: linear-gradient(180deg, #990000 0%, #D41F00 40%, #FF6A00 100%);
-    }
-    /* Sedikit pattern agar tidak polos */
-    .bg-pattern {
-      background-image: radial-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px);
-      background-size: 20px 20px;
-    }
-  </style>
 </head>
-<body class="bg-tema-ygr bg-pattern min-h-screen flex flex-col items-center p-4 md:p-8 font-sans antialiased">
+<!-- Background gradasi langsung menggunakan Tailwind class -->
+<body class="bg-gradient-to-b from-[#990000] via-[#D41F00] to-[#FF6A00] min-h-screen flex flex-col items-center p-4 md:p-8 font-sans antialiased">
 
   <!-- Bagian Header -->
   <div class="w-full max-w-lg mb-6 text-center mt-4">
@@ -32,7 +22,7 @@
     
     <form name="evaluasi-form" class="space-y-4">
       
-      <!-- Input Nama (Panitia isi nama asli) -->
+      <!-- Input Nama -->
       <div>
         <label class="block text-white font-semibold text-sm mb-1">Nama / Nomor BIB (Opsional)</label>
         <input type="text" name="Nama_peserta" placeholder="Masukkan Nama atau No BIB" required
@@ -108,9 +98,8 @@
     <p class="mt-1">IG: @yogyagarut_runtainment | TikTok: @yogya_garut</p>
   </div>
 
-  <!-- Script untuk mengirim data ke Google Sheets via API -->
   <script>
-    // URL Google Script sudah diletakkan di tempat yang benar, di dalam tag <script>
+    // URL Google Script Anda yang aktif
     const scriptURL = 'https://script.google.com/macros/s/AKfycbz96W-flYW-QkftR4PE4pD-kOexqRwmZoMVJQtLhLcmmcZ3sXhyaZDjpGHgs65akCCz/exec';
     const form = document.forms['evaluasi-form'];
     
@@ -119,27 +108,18 @@
     const alertSukses = document.getElementById('alert-sukses');
 
     form.addEventListener('submit', e => {
-      e.preventDefault(); // Mencegah reload halaman
+      e.preventDefault(); 
       
-      // Tampilkan tombol loading, sembunyikan tombol submit
       btnSubmit.classList.add('hidden');
       btnLoading.classList.remove('hidden');
       
-      // Proses kirim data ke Google Sheets
       fetch(scriptURL, { method: 'POST', body: new FormData(form)})
         .then(response => {
-          // Tampilkan alert sukses
           alertSukses.classList.remove('hidden');
-          // Kembalikan tombol seperti semula
           btnLoading.classList.add('hidden');
           btnSubmit.classList.remove('hidden');
-          // Kosongkan isi form
           form.reset();
-          
-          // Sembunyikan alert setelah 5 detik
-          setTimeout(() => {
-            alertSukses.classList.add('hidden');
-          }, 5000);
+          setTimeout(() => { alertSukses.classList.add('hidden'); }, 5000);
         })
         .catch(error => {
           console.error('Error!', error.message);
