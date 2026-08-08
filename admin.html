@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -9,94 +8,128 @@
 </head>
 <body class="bg-gray-100 min-h-screen font-sans antialiased text-gray-800">
 
-  <!-- Navbar -->
-  <nav class="bg-red-800 text-white p-4 shadow-md">
-    <div class="container mx-auto flex justify-between items-center">
-      <h1 class="text-xl font-bold tracking-wider italic">ADMIN DASHBOARD YGR2</h1>
-      <span class="text-sm bg-red-900 px-3 py-1 rounded-full">Mode Evaluasi</span>
-    </div>
-  </nav>
-
-  <div class="container mx-auto p-4 mt-6">
-    <!-- Header Content -->
-    <div class="flex justify-between items-end mb-4">
-      <div>
-        <h2 class="text-2xl font-bold text-gray-800">Daftar Feedback Panitia</h2>
-        <p class="text-gray-500 text-sm">Klik pada nama panitia untuk melihat detail evaluasi.</p>
-      </div>
-      <button onclick="fetchData()" class="bg-yellow-400 hover:bg-yellow-500 text-red-900 px-4 py-2 rounded-lg font-semibold shadow transition-all">
-        🔄 Refresh Data
+  <!-- MODAL PASSWORD LOGIN (Muncul Pertama Kali) -->
+  <div id="authModal" class="fixed inset-0 bg-gray-900 flex justify-center items-center p-4 z-50">
+    <div class="bg-white rounded-2xl p-6 w-full max-w-md shadow-2xl text-center">
+      <h3 class="text-xl font-bold text-gray-800 mb-1">Restricted Access</h3>
+      <p class="text-gray-500 text-sm mb-4">Masukkan password admin untuk melihat data.</p>
+      <input type="password" id="adminPassword" placeholder="Masukkan Password..." 
+        class="w-full rounded-lg p-3 border border-gray-300 focus:ring-2 focus:ring-red-600 outline-none mb-4 text-center text-lg">
+      <button onclick="checkPassword()" class="w-full bg-red-700 hover:bg-red-800 text-white font-bold py-3 rounded-xl transition-all">
+        Masuk Dashboard
       </button>
-    </div>
-
-    <!-- Loading State -->
-    <div id="loading" class="text-center py-10">
-      <p class="text-lg font-semibold text-gray-500 animate-pulse">Mengambil data dari database...</p>
-    </div>
-
-    <!-- Data Table / List -->
-    <div class="bg-white rounded-xl shadow-lg overflow-hidden hidden" id="data-container">
-      <table class="w-full text-left border-collapse">
-        <thead>
-          <tr class="bg-gray-200 text-gray-700 uppercase text-sm">
-            <th class="p-4 border-b">No</th>
-            <th class="p-4 border-b">Nama Panitia / Divisi</th>
-            <th class="p-4 border-b">Waktu Submit</th>
-            <th class="p-4 border-b">Aksi</th>
-          </tr>
-        </thead>
-        <tbody id="table-body">
-          <!-- Data akan di-render di sini oleh JavaScript -->
-        </tbody>
-      </table>
+      <p id="errorMsg" class="text-red-500 text-xs mt-3 hidden">Password salah! Coba lagi.</p>
+      <div class="mt-4">
+        <a href="index.html" class="text-xs text-gray-400 hover:underline">← Kembali ke Halaman Utama</a>
+      </div>
     </div>
   </div>
 
-  <!-- MODAL / POP-UP DETAIL PESAN -->
+  <!-- KONTEN UTAMA ADMIN (Disembunyikan sebelum password benar) -->
+  <div id="adminContent" class="hidden">
+    <nav class="bg-red-800 text-white p-4 shadow-md">
+      <div class="container mx-auto flex justify-between items-center">
+        <h1 class="text-xl font-bold tracking-wider italic">ADMIN DASHBOARD YGR2</h1>
+        <div class="flex items-center gap-4">
+          <span class="text-sm bg-red-900 px-3 py-1 rounded-full">Panitia: Synch</span>
+          <a href="index.html" class="text-xs bg-white/20 hover:bg-white/30 px-3 py-1.5 rounded transition-all">Logout</a>
+        </div>
+      </div>
+    </nav>
+
+    <div class="container mx-auto p-4 mt-6">
+      <div class="flex justify-between items-end mb-4">
+        <div>
+          <h2 class="text-2xl font-bold text-gray-800">Daftar Feedback Panitia</h2>
+          <p class="text-gray-500 text-sm">Klik pada nama panitia atau tombol untuk melihat detail pesan.</p>
+        </div>
+        <button onclick="fetchData()" class="bg-yellow-400 hover:bg-yellow-500 text-red-900 px-4 py-2 rounded-lg font-semibold shadow transition-all">
+          🔄 Refresh Data
+        </button>
+      </div>
+
+      <div id="loading" class="text-center py-10">
+        <p class="text-lg font-semibold text-gray-500 animate-pulse">Mengambil data dari database...</p>
+      </div>
+
+      <div class="bg-white rounded-xl shadow-lg overflow-hidden hidden" id="data-container">
+        <table class="w-full text-left border-collapse">
+          <thead>
+            <tr class="bg-gray-200 text-gray-700 uppercase text-sm">
+              <th class="p-4 border-b">ID</th>
+              <th class="p-4 border-b">Nama Panitia / Divisi</th>
+              <th class="p-4 border-b">Waktu Submit</th>
+              <th class="p-4 border-b">Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="table-body"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL DETAIL PESAN -->
   <div id="detailModal" class="fixed inset-0 bg-black bg-opacity-60 hidden flex justify-center items-center p-4 z-50">
-    <div class="bg-white rounded-2xl w-full max-w-2xl overflow-hidden shadow-2xl transform transition-all">
-      <!-- Modal Header -->
+    <div class="bg-white rounded-2xl w-full max-w-2xl overflow-hidden shadow-2xl">
       <div class="bg-red-800 p-4 flex justify-between items-center">
         <h3 class="text-white font-bold text-lg" id="modal-nama">Detail Feedback</h3>
         <button onclick="closeModal()" class="text-white hover:text-yellow-300 font-bold text-xl">&times;</button>
       </div>
-      <!-- Modal Body -->
       <div class="p-6 space-y-4 max-h-[70vh] overflow-y-auto">
         <div>
-          <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wider">Rating Acara</h4>
+          <h4 class="text-xs font-bold text-gray-400 uppercase">Rating Acara</h4>
           <p id="modal-rating" class="text-lg font-semibold text-yellow-500 mt-1"></p>
         </div>
         <div class="bg-blue-50 p-4 rounded-lg border border-blue-100">
-          <h4 class="text-xs font-bold text-blue-800 uppercase tracking-wider mb-2">Kesan</h4>
+          <h4 class="text-xs font-bold text-blue-800 uppercase mb-2">Kesan</h4>
           <p id="modal-kesan" class="text-gray-700 whitespace-pre-wrap"></p>
         </div>
         <div class="bg-green-50 p-4 rounded-lg border border-green-100">
-          <h4 class="text-xs font-bold text-green-800 uppercase tracking-wider mb-2">Pesan</h4>
+          <h4 class="text-xs font-bold text-green-800 uppercase mb-2">Pesan</h4>
           <p id="modal-pesan" class="text-gray-700 whitespace-pre-wrap"></p>
         </div>
         <div class="bg-red-50 p-4 rounded-lg border border-red-100">
-          <h4 class="text-xs font-bold text-red-800 uppercase tracking-wider mb-2">Kritik & Saran (Kendala)</h4>
+          <h4 class="text-xs font-bold text-red-800 uppercase mb-2">Kritik & Saran</h4>
           <p id="modal-kritik" class="text-gray-700 whitespace-pre-wrap"></p>
         </div>
         <div class="bg-purple-50 p-4 rounded-lg border border-purple-100">
-          <h4 class="text-xs font-bold text-purple-800 uppercase tracking-wider mb-2">Harapan Vol. 3</h4>
+          <h4 class="text-xs font-bold text-purple-800 uppercase mb-2">Harapan Vol. 3</h4>
           <p id="modal-harapan" class="text-gray-700 whitespace-pre-wrap"></p>
         </div>
       </div>
-      <!-- Modal Footer -->
       <div class="bg-gray-100 p-4 text-right">
-        <button onclick="closeModal()" class="bg-gray-600 hover:bg-gray-700 text-white px-6 py-2 rounded-lg font-semibold transition-all">Tutup</button>
+        <button onclick="closeModal()" class="bg-gray-600 hover:bg-gray-700 text-white px-6 py-2 rounded-lg font-semibold">Tutup</button>
       </div>
     </div>
   </div>
 
   <script>
-    // MASUKKAN URL GOOGLE SCRIPT ANDA DI SINI
     const scriptURL = 'https://script.google.com/macros/s/AKfycbz96W-flYW-QkftR4PE4pD-kOexqRwmZoMVJQtLhLcmmcZ3sXhyaZDjpGHgs65akCCz/exec';
-    
     let globalData = [];
 
-    // Fungsi mengambil data
+    // --- FITUR PASSWORD ADMIN ---
+    // ATUR PASSWORD ADMIN DI SINI (Ubah sesuai keinginan)
+    const ADMIN_PASSWORD = "admin321"; 
+
+    function checkPassword() {
+      const inputPass = document.getElementById('adminPassword').value;
+      const errorMsg = document.getElementById('errorMsg');
+      
+      if (inputPass === ADMIN_PASSWORD) {
+        document.getElementById('authModal').classList.add('hidden');
+        document.getElementById('adminContent').classList.remove('hidden');
+        fetchData(); // Ambil data setelah sukses login
+      } else {
+        errorMsg.classList.remove('hidden');
+      }
+    }
+
+    // Bisa tekan Enter untuk login
+    document.getElementById('adminPassword').addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') checkPassword();
+    });
+
+    // --- FITUR DASHBOARD ---
     function fetchData() {
       document.getElementById('loading').classList.remove('hidden');
       document.getElementById('data-container').classList.add('hidden');
@@ -112,7 +145,6 @@
         .catch(error => console.error('Error fetching data:', error));
     }
 
-    // Fungsi menampilkan data ke tabel
     function renderTable(data) {
       const tbody = document.getElementById('table-body');
       tbody.innerHTML = '';
@@ -122,20 +154,18 @@
         return;
       }
 
-      // Render data dari yang terbaru (dibalik)
       data.reverse().forEach((row, index) => {
-        // Format tanggal agar lebih rapi membaca Timestamp
         let dateObj = new Date(row.Timestamp);
         let formattedDate = dateObj.toLocaleDateString('id-ID') + ' ' + dateObj.toLocaleTimeString('id-ID');
 
         const tr = document.createElement('tr');
         tr.className = 'border-b hover:bg-gray-50 transition-colors';
         tr.innerHTML = `
-          <td class="p-4 text-gray-600">${index + 1}</td>
+          <td class="p-4 text-xs font-mono bg-gray-50 font-bold text-gray-600">${row.idUnik || '-'}</td>
           <td class="p-4 font-semibold text-gray-800">${row.Nama_peserta || '-'}</td>
           <td class="p-4 text-sm text-gray-500">${formattedDate}</td>
           <td class="p-4">
-            <button onclick="openModal('${row.ID_Unik}')" class="bg-red-700 hover:bg-red-800 text-white px-4 py-2 rounded shadow text-sm transition-all">
+            <button onclick="openModal('${row.idUnik}')" class="bg-red-700 hover:bg-red-800 text-white px-4 py-2 rounded shadow text-sm transition-all">
               Buka Pesan
             </button>
           </td>
@@ -144,11 +174,10 @@
       });
     }
 
-    // Fungsi membuka modal
     function openModal(idUnik) {
-      const selectedData = globalData.find(item => item.ID_Unik === idUnik);
+      const selectedData = globalData.find(item => item.idUnik == idUnik);
       if (selectedData) {
-        document.getElementById('modal-nama').innerText = `Evaluasi dari: ${selectedData.Nama_peserta}`;
+        document.getElementById('modal-nama').innerText = `Evaluasi dari: ${selectedData.Nama_peserta} (ID: ${selectedData.idUnik})`;
         document.getElementById('modal-rating').innerText = selectedData.Rating || 'Tidak ada rating';
         document.getElementById('modal-kesan').innerText = selectedData.Kesan || '-';
         document.getElementById('modal-pesan').innerText = selectedData.Pesan || '-';
@@ -159,13 +188,9 @@
       }
     }
 
-    // Fungsi menutup modal
     function closeModal() {
       document.getElementById('detailModal').classList.add('hidden');
     }
-
-    // Panggil fetch data pertama kali halaman dibuka
-    window.onload = fetchData;
   </script>
 </body>
 </html>
