@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Panel - Evaluasi YGR2</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen font-sans antialiased text-gray-800">
+
+  <!-- Navbar -->
+  <nav class="bg-red-800 text-white p-4 shadow-md">
+    <div class="container mx-auto flex justify-between items-center">
+      <h1 class="text-xl font-bold tracking-wider italic">ADMIN DASHBOARD YGR2</h1>
+      <span class="text-sm bg-red-900 px-3 py-1 rounded-full">Mode Evaluasi</span>
+    </div>
+  </nav>
+
+  <div class="container mx-auto p-4 mt-6">
+    <!-- Header Content -->
+    <div class="flex justify-between items-end mb-4">
+      <div>
+        <h2 class="text-2xl font-bold text-gray-800">Daftar Feedback Panitia</h2>
+        <p class="text-gray-500 text-sm">Klik pada nama panitia untuk melihat detail evaluasi.</p>
+      </div>
+      <button onclick="fetchData()" class="bg-yellow-400 hover:bg-yellow-500 text-red-900 px-4 py-2 rounded-lg font-semibold shadow transition-all">
+        🔄 Refresh Data
+      </button>
+    </div>
+
+    <!-- Loading State -->
+    <div id="loading" class="text-center py-10">
+      <p class="text-lg font-semibold text-gray-500 animate-pulse">Mengambil data dari database...</p>
+    </div>
+
+    <!-- Data Table / List -->
+    <div class="bg-white rounded-xl shadow-lg overflow-hidden hidden" id="data-container">
+      <table class="w-full text-left border-collapse">
+        <thead>
+          <tr class="bg-gray-200 text-gray-700 uppercase text-sm">
+            <th class="p-4 border-b">No</th>
+            <th class="p-4 border-b">Nama Panitia / Divisi</th>
+            <th class="p-4 border-b">Waktu Submit</th>
+            <th class="p-4 border-b">Aksi</th>
+          </tr>
+        </thead>
+        <tbody id="table-body">
+          <!-- Data akan di-render di sini oleh JavaScript -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- MODAL / POP-UP DETAIL PESAN -->
+  <div id="detailModal" class="fixed inset-0 bg-black bg-opacity-60 hidden flex justify-center items-center p-4 z-50">
+    <div class="bg-white rounded-2xl w-full max-w-2xl overflow-hidden shadow-2xl transform transition-all">
+      <!-- Modal Header -->
+      <div class="bg-red-800 p-4 flex justify-between items-center">
+        <h3 class="text-white font-bold text-lg" id="modal-nama">Detail Feedback</h3>
+        <button onclick="closeModal()" class="text-white hover:text-yellow-300 font-bold text-xl">&times;</button>
+      </div>
+      <!-- Modal Body -->
+      <div class="p-6 space-y-4 max-h-[70vh] overflow-y-auto">
+        <div>
+          <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wider">Rating Acara</h4>
+          <p id="modal-rating" class="text-lg font-semibold text-yellow-500 mt-1"></p>
+        </div>
+        <div class="bg-blue-50 p-4 rounded-lg border border-blue-100">
+          <h4 class="text-xs font-bold text-blue-800 uppercase tracking-wider mb-2">Kesan</h4>
+          <p id="modal-kesan" class="text-gray-700 whitespace-pre-wrap"></p>
+        </div>
+        <div class="bg-green-50 p-4 rounded-lg border border-green-100">
+          <h4 class="text-xs font-bold text-green-800 uppercase tracking-wider mb-2">Pesan</h4>
+          <p id="modal-pesan" class="text-gray-700 whitespace-pre-wrap"></p>
+        </div>
+        <div class="bg-red-50 p-4 rounded-lg border border-red-100">
+          <h4 class="text-xs font-bold text-red-800 uppercase tracking-wider mb-2">Kritik & Saran (Kendala)</h4>
+          <p id="modal-kritik" class="text-gray-700 whitespace-pre-wrap"></p>
+        </div>
+        <div class="bg-purple-50 p-4 rounded-lg border border-purple-100">
+          <h4 class="text-xs font-bold text-purple-800 uppercase tracking-wider mb-2">Harapan Vol. 3</h4>
+          <p id="modal-harapan" class="text-gray-700 whitespace-pre-wrap"></p>
+        </div>
+      </div>
+      <!-- Modal Footer -->
+      <div class="bg-gray-100 p-4 text-right">
+        <button onclick="closeModal()" class="bg-gray-600 hover:bg-gray-700 text-white px-6 py-2 rounded-lg font-semibold transition-all">Tutup</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // MASUKKAN URL GOOGLE SCRIPT ANDA DI SINI
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbz96W-flYW-QkftR4PE4pD-kOexqRwmZoMVJQtLhLcmmcZ3sXhyaZDjpGHgs65akCCz/exec';
+    
+    let globalData = [];
+
+    // Fungsi mengambil data
+    function fetchData() {
+      document.getElementById('loading').classList.remove('hidden');
+      document.getElementById('data-container').classList.add('hidden');
+      
+      fetch(scriptURL)
+        .then(response => response.json())
+        .then(data => {
+          globalData = data;
+          renderTable(data);
+          document.getElementById('loading').classList.add('hidden');
+          document.getElementById('data-container').classList.remove('hidden');
+        })
+        .catch(error => console.error('Error fetching data:', error));
+    }
+
+    // Fungsi menampilkan data ke tabel
+    function renderTable(data) {
+      const tbody = document.getElementById('table-body');
+      tbody.innerHTML = '';
+      
+      if (data.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="4" class="p-4 text-center text-gray-500">Belum ada data evaluasi yang masuk.</td></tr>';
+        return;
+      }
+
+      // Render data dari yang terbaru (dibalik)
+      data.reverse().forEach((row, index) => {
+        // Format tanggal agar lebih rapi membaca Timestamp
+        let dateObj = new Date(row.Timestamp);
+        let formattedDate = dateObj.toLocaleDateString('id-ID') + ' ' + dateObj.toLocaleTimeString('id-ID');
+
+        const tr = document.createElement('tr');
+        tr.className = 'border-b hover:bg-gray-50 transition-colors';
+        tr.innerHTML = `
+          <td class="p-4 text-gray-600">${index + 1}</td>
+          <td class="p-4 font-semibold text-gray-800">${row.Nama_peserta || '-'}</td>
+          <td class="p-4 text-sm text-gray-500">${formattedDate}</td>
+          <td class="p-4">
+            <button onclick="openModal('${row.ID_Unik}')" class="bg-red-700 hover:bg-red-800 text-white px-4 py-2 rounded shadow text-sm transition-all">
+              Buka Pesan
+            </button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // Fungsi membuka modal
+    function openModal(idUnik) {
+      const selectedData = globalData.find(item => item.ID_Unik === idUnik);
+      if (selectedData) {
+        document.getElementById('modal-nama').innerText = `Evaluasi dari: ${selectedData.Nama_peserta}`;
+        document.getElementById('modal-rating').innerText = selectedData.Rating || 'Tidak ada rating';
+        document.getElementById('modal-kesan').innerText = selectedData.Kesan || '-';
+        document.getElementById('modal-pesan').innerText = selectedData.Pesan || '-';
+        document.getElementById('modal-kritik').innerText = selectedData.Kritik || '-';
+        document.getElementById('modal-harapan').innerText = selectedData.Harapan || '-';
+        
+        document.getElementById('detailModal').classList.remove('hidden');
+      }
+    }
+
+    // Fungsi menutup modal
+    function closeModal() {
+      document.getElementById('detailModal').classList.add('hidden');
+    }
+
+    // Panggil fetch data pertama kali halaman dibuka
+    window.onload = fetchData;
+  </script>
+</body>
+</html>
