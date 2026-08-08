@@ -4,60 +4,45 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Kuesioner Runtainment Vol. 2</title>
-  <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<!-- Background gradasi langsung menggunakan Tailwind class -->
 <body class="bg-gradient-to-b from-[#990000] via-[#D41F00] to-[#FF6A00] min-h-screen flex flex-col items-center p-4 md:p-8 font-sans antialiased">
 
-  <!-- Bagian Header -->
+  <!-- Header -->
   <div class="w-full max-w-lg mb-6 text-center mt-4">
     <h1 class="text-3xl font-black text-white italic tracking-wider drop-shadow-md">KUESIONER & TESTIMONI</h1>
     <h2 class="text-xl font-bold text-yellow-300 italic tracking-wide drop-shadow-md">RUNTAINMENT VOL. 2</h2>
     <p class="text-white/90 text-sm mt-2">Bagikan pengalaman seru Anda selama mengikuti event lari terbesar di Garut!</p>
   </div>
 
-  <!-- Container Form -->
+  <!-- Form Container -->
   <div class="bg-white/10 backdrop-blur-md border border-white/20 p-6 md:p-8 rounded-2xl w-full max-w-lg shadow-2xl">
-    
     <form name="evaluasi-form" class="space-y-4">
-      
-      <!-- Input Nama -->
       <div>
         <label class="block text-white font-semibold text-sm mb-1">Nama / Nomor BIB (Opsional)</label>
         <input type="text" name="Nama_peserta" placeholder="Masukkan Nama atau No BIB" required
           class="w-full rounded-lg p-3 text-gray-900 bg-white border border-gray-300 focus:ring-2 focus:ring-yellow-400 outline-none">
       </div>
-
-      <!-- Input Kesan -->
       <div>
         <label class="block text-white font-semibold text-sm mb-1">Kesan selama mengikuti event</label>
         <textarea name="Kesan" rows="2" placeholder="Ceritakan keseruan acara kemarin..." required
           class="w-full rounded-lg p-3 text-gray-900 bg-white border border-gray-300 focus:ring-2 focus:ring-yellow-400 outline-none"></textarea>
       </div>
-
-      <!-- Input Pesan -->
       <div>
         <label class="block text-white font-semibold text-sm mb-1">Pesan untuk panitia dan acara</label>
         <textarea name="Pesan" rows="2" placeholder="Pesan Anda untuk panitia..." required
           class="w-full rounded-lg p-3 text-gray-900 bg-white border border-gray-300 focus:ring-2 focus:ring-yellow-400 outline-none"></textarea>
       </div>
-
-      <!-- Input Kritik -->
       <div>
         <label class="block text-white font-semibold text-sm mb-1">Kritik & Saran Perbaikan</label>
         <textarea name="Kritik" rows="2" placeholder="Ada yang kurang? Sampaikan di sini..." required
           class="w-full rounded-lg p-3 text-gray-900 bg-white border border-gray-300 focus:ring-2 focus:ring-yellow-400 outline-none"></textarea>
       </div>
-
-      <!-- Input Harapan -->
       <div>
         <label class="block text-white font-semibold text-sm mb-1">Harapan untuk Runtainment Vol. 3</label>
         <textarea name="Harapan" rows="2" placeholder="Harapan untuk event selanjutnya..." required
           class="w-full rounded-lg p-3 text-gray-900 bg-white border border-gray-300 focus:ring-2 focus:ring-yellow-400 outline-none"></textarea>
       </div>
-
-      <!-- Input Rating -->
       <div>
         <label class="block text-white font-semibold text-sm mb-1">Seberapa puas Anda dengan event ini?</label>
         <select name="Rating" required
@@ -71,63 +56,72 @@
         </select>
       </div>
 
-      <!-- Tombol Submit & Pesan Loading/Sukses -->
       <div class="pt-4">
         <button type="submit" id="btn-submit" 
           class="w-full bg-yellow-400 hover:bg-yellow-500 text-red-900 font-bold text-lg py-3 rounded-xl transition-all shadow-lg transform hover:scale-[1.02]">
           KIRIM TESTIMONI
         </button>
-        
         <button id="btn-loading" class="hidden w-full bg-yellow-600 text-white font-bold text-lg py-3 rounded-xl cursor-not-allowed" disabled>
           MENGIRIM DATA...
         </button>
       </div>
-
-      <!-- Alert Sukses -->
-      <div id="alert-sukses" class="hidden bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg relative mt-3" role="alert">
-        <strong class="font-bold">Terima Kasih!</strong>
-        <span class="block sm:inline">Feedback Anda berhasil dikirim.</span>
-      </div>
-
     </form>
   </div>
 
-  <!-- Footer Samaran -->
+  <!-- Footer dengan Link Rahasia ke Admin -->
   <div class="mt-8 text-center text-white/70 text-xs pb-6">
-    <p>&copy; 2026 Yogya Garut Runtainment</p>
+    <p>&copy; 2026 Yogya Garut Runtainment 
+       <!-- Link rahasia di nama Synch -->
+       <a href="admin.html" class="hover:text-yellow-300 underline transition-colors">- Synch</a>
+    </p>
     <p class="mt-1">IG: @yogyagarut_runtainment | TikTok: @yogya_garut</p>
   </div>
 
+  <!-- POP-UP SUKSES SETELAH KIRIM -->
+  <div id="successModal" class="fixed inset-0 bg-black bg-opacity-60 hidden flex justify-center items-center p-4 z-50">
+    <div class="bg-white rounded-2xl p-6 w-full max-w-sm text-center shadow-2xl transform scale-95 transition-all">
+      <div class="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl font-bold">
+        ✓
+      </div>
+      <h3 class="text-xl font-bold text-gray-800 mb-2">Terima Kasih!</h3>
+      <p class="text-gray-600 text-sm mb-6">Testimoni & evaluasi Anda berhasil dikirim untuk kesuksesan event kita.</p>
+      <button onclick="closeSuccessModal()" class="w-full bg-red-700 hover:bg-red-800 text-white font-semibold py-2.5 rounded-xl transition-all">
+        Tutup
+      </button>
+    </div>
+  </div>
+
   <script>
-    // URL Google Script Anda yang aktif
     const scriptURL = 'https://script.google.com/macros/s/AKfycbz96W-flYW-QkftR4PE4pD-kOexqRwmZoMVJQtLhLcmmcZ3sXhyaZDjpGHgs65akCCz/exec';
     const form = document.forms['evaluasi-form'];
-    
     const btnSubmit = document.getElementById('btn-submit');
     const btnLoading = document.getElementById('btn-loading');
-    const alertSukses = document.getElementById('alert-sukses');
+    const successModal = document.getElementById('successModal');
 
     form.addEventListener('submit', e => {
-      e.preventDefault(); 
-      
+      e.preventDefault();
       btnSubmit.classList.add('hidden');
       btnLoading.classList.remove('hidden');
       
       fetch(scriptURL, { method: 'POST', body: new FormData(form)})
         .then(response => {
-          alertSukses.classList.remove('hidden');
           btnLoading.classList.add('hidden');
           btnSubmit.classList.remove('hidden');
           form.reset();
-          setTimeout(() => { alertSukses.classList.add('hidden'); }, 5000);
+          // Munculkan Pop-up
+          successModal.classList.remove('hidden');
         })
         .catch(error => {
           console.error('Error!', error.message);
-          alert('Mohon maaf, terjadi kesalahan jaringan. Silakan coba lagi.');
+          alert('Terjadi kesalahan jaringan. Silakan coba lagi.');
           btnLoading.classList.add('hidden');
           btnSubmit.classList.remove('hidden');
         });
     });
+
+    function closeSuccessModal() {
+      successModal.classList.add('hidden');
+    }
   </script>
 </body>
 </html>
